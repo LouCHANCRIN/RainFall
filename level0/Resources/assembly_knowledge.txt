@@ -1,0 +1,3 @@
+$ prefix is for immediate constant and % prefix is for registers
+ebp register is used to point at the top of the stack
+(%register) is the memory location value that is stored in the register address
