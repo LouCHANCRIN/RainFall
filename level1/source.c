@@ -1,11 +1,13 @@
 
 void run(void) {
-    fwrite("text", step, length)
+    fwrite("Good... Wait what?\n", 1, 19, 1)
     system('???')
+    return;
 }
 
 
 int main(void) {
-
-    gets()    
+    char buffer [20]
+    gets(buffer)    
+    return;
 }
