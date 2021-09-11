@@ -1,0 +1,19 @@
+We can see a binary file that doesnt do anything until we press enter when executed.
+We can assume that its waiting for user input
+
+objdump -s level1 >/tmp/assembly 
+
+We can see that the main function is just doing a call to the 'gets' function.
+This function have a security issue because the buffer size is dynamic.
+We can see a function called 'run' at address '08048444' that is not called by the program.
+We will use the gets function vulnerability to call the run function.
+
+We have to create a payload to fill the buffer and then call the 'run' function.
+We will do `$ ruby -e 'print "\x44\x84\x04\x08" * 50' > /tmp/buffer_overload`.
+What is does is that it write the 'run' function address 50 times so that when we give it to the binary it will overflow the buffer and then call the 'run' function.
+Here we will call it multiple times because "\x44\x84\x04\x08" * 50 = 200 bytes and the buffer is way smaller than 200 bytes.
+Its pretty safe to do because the buffers allocated space is usually a multiple of 4 so its unlikely that the address we give after the overflow will be messed up.
+
+Then we pass our payload to the binary with '$ cat /tmp/buffer_overload - | ./level1'
+We use 'cat file -' because the dash means stdin, it going to wait for user input.
+Once we are in the shell opened by the binary we do 'cat /home/user/level2/.pass' and we get the flag.
