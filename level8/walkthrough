@@ -1,0 +1,12 @@
+Using gdb we can see that 2 words are hardcoded
+    (gdb) disass main
+    ...
+    0x08048575 <+17>:    mov    0x8049ab0,%ecx
+    0x0804857b <+23>:    mov    0x8049aac,%edx
+   ...
+    (gdb) x/x 0x8049aac
+    0x8049aac <auth>:       0x00000000
+    (gdb) x/x 0x8049ab0
+    0x8049ab0 <service>:    0x00000000
+
+auth will be stored in edx and service will be stored in ecx.
