@@ -9,9 +9,13 @@ int main(int ac, char **av) {
     uid_t   resuid;
 
     if (atoi(av[1]) == 423) {
-        execv_args = strdup("/bin/sh");
-        setresgid();
-        setresuid();
+        execv_args[0] = strdup("/bin/sh");
+        execv_args[1] = NULL;
+
+        gid = getegig();
+        uid = geteuid();
+        setresgid()
+        setresuid()
         execv('/bin/sh', execv_args);
     }
     else {

@@ -22,9 +22,9 @@ int main(int ac, char **av) {
     b[1] = malloc(8);
 
     strcpy((char *)a[1], av[1]);
-    strcpy((char *)a[2], av[2]);
+    strcpy((char *)b[1], av[2]);
 
-    my_file = fopen("/hone/user/level8/.pass", "r");
+    my_file = fopen("/home/user/level8/.pass", "r");
     fgets(buffer, 68, my_file);
 
     puts("~~");
