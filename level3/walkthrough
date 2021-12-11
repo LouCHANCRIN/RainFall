@@ -26,6 +26,8 @@ We can see that the value storage start at the 4th argument.
 We will use %n to modify the variable as well as the 0x804988c register where our variable is stored.
 We want to display 64 (0x40) bits and then store that value in our register with the %n specifier so that the comparison is successful.
 With '%60x' we will display 60 bytes. To that will be added the 4 bytes of the address.
+What will happen is that the first 4 bytes will be written in the 4th register as seen previously and then we will use %n to storethe number
+of bytes displayed by printf in the address stored in the 4 register printf will access.
 
 $ ruby -e 'print "\x8c\x98\x04\x08" + "%60x%4\$n"' > /tmp/buffer_file
 $ cat /tmp/buffer_file - | ./level3
